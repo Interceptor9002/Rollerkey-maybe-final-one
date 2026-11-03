@@ -1,0 +1,1585 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="RollerKey">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="./icon.svg">
+<link rel="icon" href="./icon.svg">
+<title>RollerKey</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+body{margin:0;background:#000;color:#3dff88;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;padding:14px 14px 40px;overscroll-behavior:none}
+h1{font-size:17px;letter-spacing:.22em;margin:0 0 2px;color:#7dffb0}
+h2{font-size:11px;letter-spacing:.2em;color:#1f7a45;margin:22px 0 8px;border-bottom:1px solid #10331f;padding-bottom:5px}
+.sub{font-size:10px;color:#1f7a45;letter-spacing:.12em;margin-bottom:12px}
+#stat{background:#04160c;border:1px solid #0d3d22;padding:8px 10px;font-size:11px;color:#8affc0;margin-bottom:6px;word-break:break-word}
+#stat.warn{color:#ffd24a;border-color:#4a3d0d;background:#161204}
+#stat.err{color:#ff5f5f;border-color:#4a0d0d;background:#160404}
+#stat.ok{color:#3dff88}
+button{font:inherit;font-size:12px;letter-spacing:.1em;background:#03130a;color:#3dff88;border:1px solid #14522e;padding:13px 8px;border-radius:3px;width:100%;text-transform:uppercase}
+button:active{background:#0a2c19}
+button:disabled{opacity:.32;color:#2c6a45;border-color:#0d2d1a}
+button.wide{margin-top:8px}
+button.danger{color:#ff7a7a;border-color:#4a1616}
+button.an{border-color:#3dff88;color:#7dffb0;background:#0a2c19}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+input{font:inherit;font-size:12px;background:#02100a;color:#8affc0;border:1px solid #10331f;padding:12px 10px;border-radius:3px;width:100%;margin-top:8px}
+input::placeholder{color:#1c5c37}
+hr{border:0;border-top:1px dashed #10331f;margin:14px 0}
+#log{background:#010a05;border:1px solid #0d3d22;padding:9px;height:200px;overflow-y:auto;font-size:11px;line-height:1.5;-webkit-overflow-scrolling:touch}
+#log div{word-break:break-word;border-bottom:1px solid #061a0e;padding:2px 0}
+#log .t{color:#175c34}
+#log .w{color:#ffd24a}
+#log .e{color:#ff5f5f}
+#log .o{color:#7dffb0}
+.mini{font-size:10px;color:#1f7a45;letter-spacing:.1em}
+details{margin-top:14px}
+summary{font-size:11px;letter-spacing:.2em;color:#1f7a45;padding:10px 0;cursor:pointer}
+#qr{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:9}
+#qr.on{display:flex}
+#qr video{flex:1;width:100%;object-fit:cover}
+#qr .bar{padding:12px;display:flex;gap:8px}
+</style>
+</head>
+<body>
+
+<h1>ROLLERKEY</h1>
+<div class="sub">BLE · LIME / VOI / BOLT · OHNE KONTO</div>
+<div id="stat">bereit</div>
+
+<h2>VERBINDUNG</h2>
+<div class="grid3">
+  <button id="bFind">SUCHEN</button>
+  <button id="bAll">ALLE</button>
+  <button id="bDiag">DIAGNOSE</button>
+</div>
+<button class="wide" id="bUnlock">ENTSPERREN</button>
+<div class="grid" style="margin-top:8px">
+  <button id="bLock">SPERRE</button>
+  <button id="bBat">AKKU</button>
+</div>
+<button class="wide" id="bShot">ROHLING</button>
+
+<h2>KONTO</h2>
+<div class="grid3">
+  <button id="bLime">LIME</button>
+  <button id="bVoi">VOI</button>
+  <button id="bBolt">BOLT</button>
+</div>
+<input id="iMail" placeholder="eigene Mailadresse" inputmode="email" autocapitalize="off">
+<div class="two">
+  <input id="iTok" placeholder="Token / Link" autocapitalize="off">
+  <button id="bTok">TOKEN</button>
+</div>
+<div class="grid">
+  <button id="bOwn">WEGWERF</button>
+  <button id="bLink">MAIL SENDEN</button>
+</div>
+<input id="iPhone" placeholder="Handynummer (Voi / Bolt)" inputmode="tel">
+<div class="two">
+  <input id="iCode" placeholder="SMS-Code" inputmode="numeric">
+  <button id="bOtp">CODE</button>
+</div>
+<div class="two">
+  <button id="bBal">GUTHABEN</button>
+  <button id="bCodes">CODES</button>
+</div>
+<div class="two">
+  <button id="bCard">KARTE</button>
+  <button id="bAttach">KARTE HINTERLEGEN</button>
+</div>
+<div class="two">
+  <button id="bScan">QR SCAN</button>
+  <button id="bTorch">LICHT</button>
+</div>
+
+<h2>KONSOLE</h2>
+<div id="log"></div>
+<div class="two">
+  <button id="bCopy">KOPIEREN</button>
+  <button id="bClear">LEEREN</button>
+</div>
+
+<h2>WARTUNG</h2>
+<div class="grid">
+  <button id="bRelay">NETZ TESTEN</button>
+  <button id="bReset" class="danger">ZURÜCKSETZEN</button>
+</div>
+
+<details>
+<summary>ERWEITERT</summary>
+<input id="iRelay" placeholder="Relay-Adresse, endet mit ?url=" autocapitalize="off">
+<button class="wide" id="bSaveRelay">SPEICHERN</button>
+<button class="wide" id="bRelayDel">RELAY LÖSCHEN</button>
+<hr>
+<input id="iPk" placeholder="Stripe-Schlüssel pk_live_…" autocapitalize="off">
+<button class="wide" id="bPk">SPEICHERN</button>
+<button class="wide" id="bPkFind">SCHLÜSSEL SUCHEN</button>
+<input id="iBin" placeholder="eigene BIN (6 Stellen)" inputmode="numeric" maxlength="6">
+<button class="wide" id="bBin">BIN SETZEN</button>
+<button class="wide" id="bBlock">BLOCKER PRÜFEN</button>
+<hr>
+<input id="iAt" placeholder="AT-Passwort (leer = aus Gerätenamen)">
+<button class="wide" id="bAt">AT-ANMELDUNG</button>
+<hr>
+<span class="mini">OKAI AT (VOI / BOLT)</span>
+<button class="wide" id="bOkaiUn">OKAI ENTSPERREN</button>
+<button class="wide" id="bOkaiLk">OKAI SPERREN</button>
+<button class="wide" id="bOkaiBat">OKAI AKKU LESEN</button>
+<hr>
+<span class="mini">FRAMES</span>
+<div class="two">
+  <input id="iCmd" placeholder="Kommando (Hex)" value="1663">
+  <input id="iPay" placeholder="Payload (Hex)">
+</div>
+<button class="wide" id="bFrame">FRAME SENDEN</button>
+<input id="iReg" placeholder="Register (Hex)" maxlength="2">
+<button class="wide" id="bRead">REGISTER LESEN</button>
+<hr>
+<span class="mini">ROH</span>
+<input id="iSvc" placeholder="Dienst-UUID">
+<input id="iCh" placeholder="Kanal-UUID">
+<input id="iRaw" placeholder="Text oder Hex">
+<button class="wide" id="bRaw">SENDEN</button>
+<hr>
+<span class="mini">PASSWORT AUS IMEI</span>
+<input id="iImei" placeholder="IMEI (15 Stellen)" inputmode="numeric" maxlength="15">
+<button class="wide" id="bImei">PASSWORT SUCHEN</button>
+</details>
+
+<div id="qr">
+  <video id="vid" playsinline muted></video>
+  <div class="bar"><button id="bQrClose">ZU</button></div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════ HILFEN ═══════════════ */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const u8 = s => new TextEncoder().encode(s);
+const hex = b => [...b].map(x => x.toString(16).padStart(2, "0")).join("");
+const vonHex = s => {
+  const t = String(s).replace(/[^0-9a-f]/gi, "");
+  const o = new Uint8Array(t.length >> 1);
+  for (let i = 0; i < o.length; i++) o[i] = parseInt(t.substr(i * 2, 2), 16);
+  return o;
+};
+
+function log(t, k){
+  const d = document.createElement("div");
+  d.className = k || "";
+  d.innerHTML = '<span class="t">' + new Date().toLocaleTimeString("de-DE") + "</span> " + esc(t);
+  const b = $("log");
+  b.appendChild(d);
+  while (b.children.length > 400) b.removeChild(b.firstChild);
+  b.scrollTop = b.scrollHeight;
+}
+const ok = t => log(t, "o");
+const warn = t => log(t, "w");
+const err = t => log(t, "e");
+function stat(t, k){ const e = $("stat"); e.textContent = t; e.className = k || ""; }
+const kurz = e => {
+  const m = e && (e.message || String(e));
+  if (m === "NetworkError" || m === "Load failed") return "Netzfehler";
+  if (m === "AbortError" || m === "The operation was aborted.") return "Zeitlimit";
+  return (m || "unbekannt").slice(0, 120);
+};
+
+/* ═══════════════ ZUSTAND ═══════════════ */
+const KEY = "rk_";
+const S = {
+  dev:null, srv:null, ch:null, nt:null, okai:false, busy:false, prov:false,
+  brand:"lime", acct:null, karten:{}, pk:{}, ident:null,
+  dtok:null, block:{}, ride:null, rx:"", atRx:"", notes:0, dead:{},
+  okaiSeq:0, relay:"", cam:null, raf:0, warte:null, tot:{}
+};
+const ls = (k, v) => {
+  try { v === undefined ? localStorage.removeItem(KEY + k) : localStorage.setItem(KEY + k, JSON.stringify(v)); } catch(_){}
+};
+const lg = (k, d) => {
+  try { const v = localStorage.getItem(KEY + k); return v === null ? d : JSON.parse(v); } catch(_){ return d; }
+};
+
+function laden(){
+  S.karten = lg("karten", {}) || {};
+  S.pk = lg("pk", {}) || {};
+  S.ident = lg("ident", null);
+  S.dtok = lg("dtok", null);
+  S.block = lg("block", {}) || {};
+  S.ride = lg("ride", null);
+  S.relay = lg("relay", "") || "";
+  S.brand = lg("brand", "lime") || "lime";
+  S.acct = lg("acct", null);
+  $("iRelay").value = S.relay;
+  if (S.acct && S.acct.nummer) $("iPhone").value = S.acct.nummer;
+  if (S.pk.lime) $("iPk").value = S.pk.lime;
+}
+const speichern = () => {
+  ls("karten", S.karten); ls("pk", S.pk); ls("block", S.block);
+  ls("ride", S.ride); ls("brand", S.brand); ls("acct", S.acct);
+};
+
+/* ═══════════════ NETZ ═══════════════
+   Ist ein eigener Relay gesetzt, läuft ausschließlich dieser plus direkt.
+   Ohne Relay greift die öffentliche Kette — die ist launisch:
+   cors.dev reicht nur GET ohne Authorization weiter, cors.lol ist im
+   Rate-Limit, allorigins fällt aus. killcors, corsfix und codetabs sind raus. */
+
+const POSTWEGE = [
+  u => "https://api.cors.lol/?url=" + encodeURIComponent(u)
+];
+const GETWEGE = [
+  u => "https://proxy.cors.dev/" + u,
+  u => "https://api.cors.lol/?url=" + encodeURIComponent(u),
+  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)
+];
+const RELAYFEHLER = /corsfix_error|invalid_origin|domain_not_registered|allorigins|too many requests|rate limit|bad gateway|just a moment|access denied|unauthorized|missing_api_key|api key|<html|^\s*$/i;
+
+const gesperrt = w => (S.tot[w] || 0) > Date.now();
+const sperre = (w, ms) => { S.tot[w] = Date.now() + ms; };
+
+/* Relay zuerst und exklusiv; ohne Relay die öffentliche Kette */
+function wege(post){
+  const l = [];
+  if (S.relay){
+    l.push(S.relay);
+    l.push(u => u);
+    return l;
+  }
+  l.push(u => u);
+  for (const w of (post ? POSTWEGE : GETWEGE)) l.push(w);
+  return l;
+}
+
+/* 401/403/429 sind nur echt, wenn der Inhalt nach Nutzdaten aussieht */
+function echt(res, text){
+  if (res.status < 400) return true;
+  if ([400, 404, 409, 422].indexOf(res.status) >= 0) return true;
+  if ([401, 403, 429].indexOf(res.status) >= 0){
+    const t = (text || "").trim();
+    if (t.charAt(0) === "{" || t.charAt(0) === "[") return true;
+    return !RELAYFEHLER.test(t) && t.length > 0;
+  }
+  return false;
+}
+
+async function roh(url, opt, versuche){
+  opt = opt || {};
+  const post = (opt.method || "GET").toUpperCase() !== "GET";
+  let letzter = "kein Weg";
+  for (const w of wege(post)){
+    const name = w("x") === "x" ? "DIREKT" : w("x").slice(0, 40);
+    if (name !== "DIREKT" && gesperrt(name)){ letzter = name + " gesperrt"; continue; }
+    for (let i = 0; i < (versuche || 2); i++){
+      const ac = new AbortController();
+      const zeit = setTimeout(() => ac.abort(), 12000);
+      try {
+        const res = await fetch(w(url), Object.assign({}, opt, { signal:ac.signal, redirect:"follow" }));
+        clearTimeout(zeit);
+        if (res.status === 204){ S.tot[name] = 0; return res; }
+        const t = await res.text();
+        if (echt(res, t)){
+          S.tot[name] = 0;
+          return new Response(t, { status:res.status, statusText:res.statusText, headers:res.headers });
+        }
+        letzter = name + " HTTP " + res.status;
+        if (res.status === 401 || res.status === 429) sperre(name, 120000);
+      } catch(e){
+        clearTimeout(zeit);
+        letzter = name + ": " + kurz(e);
+        if (name === "DIREKT"){ sperre(name, 15000); break; }
+      }
+      await sleep(80);
+    }
+  }
+  throw new Error(letzter);
+}
+
+async function jget(url, kopf){
+  const r = await roh(url, { headers: Object.assign({ "Accept":"application/json" }, kopf || {}) });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json().catch(() => { throw new Error("kein JSON"); });
+}
+async function jsend(url, body, kopf){
+  const r = await roh(url, {
+    method:"POST",
+    headers: Object.assign({ "Content-Type":"application/json", "Accept":"application/json" }, kopf || {}),
+    body: JSON.stringify(body)
+  });
+  const t = await r.text();
+  let d = null;
+  try { d = JSON.parse(t); } catch(_){}
+  return { status:r.status, ok:r.ok, text:t.slice(0, 400), data:d };
+}
+
+/* ═══════════════ IDENTITÄT ═══════════════ */
+const VORN = ["Anna","Lena","Marie","Jonas","Felix","Tim","Nina","Paul","Emma","Luca","Sara","David","Mia","Jan","Lea","Tom"];
+const NACH = ["Müller","Schmidt","Weber","Wagner","Becker","Hoffmann","Koch","Richter","Wolf","Neumann","Zimmer","Krüger","Brandt","Sauer","Vogel"];
+
+function zufall(n){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+const pick = a => a[zufall(a.length)];
+
+function neueIdent(){
+  return {
+    v: pick(VORN), n: pick(NACH),
+    j: 1970 + zufall(32), m: 1 + zufall(12), t: 1 + zufall(28),
+    plz: String(10000 + zufall(89999)),
+    stadt: pick(["Berlin","Hamburg","München","Köln","Leipzig","Dresden"]),
+    str: pick(["Hauptstr.","Gartenweg","Ringstr.","Am Park","Lindenallee"]) + " " + (1 + zufall(120)),
+    tel: "15" + String(10000000 + zufall(89999999))
+  };
+}
+const ident = () => (S.ident = S.ident || neueIdent());
+
+/* ═══════════════ KARTE ═══════════════ */
+const BINS = {
+  visa: ["453914","455673","491644","402400","448527","471610","492900","415000","453176"],
+  mastercard: ["542523","543111","555555","510510","222300","539983","522100","545400"],
+  amex: ["378282","371449","341111"]
+};
+const BRAND_OK = ["visa","mastercard","amex"];
+
+function luhn(s){
+  let n = 0, dbl = false;
+  for (let i = s.length - 1; i >= 0; i--){
+    let d = s.charCodeAt(i) - 48;
+    if (dbl){ d *= 2; if (d > 9) d -= 9; }
+    n += d;
+    dbl = !dbl;
+  }
+  return n % 10 === 0;
+}
+function voll(nummer){
+  const ziel = nummer.length === 15 ? 15 : 16;
+  let s = nummer;
+  while (s.length < ziel - 1) s += String(zufall(10));
+  for (let c = 0; c < 10; c++) if (luhn(s + c)) return s + c;
+  return s + "0";
+}
+function neueKarte(brand){
+  brand = BRAND_OK.indexOf(brand) >= 0 ? brand : "visa";
+  const bin = S.karten["bin_" + brand] || pick(BINS[brand]);
+  const i = ident();
+  const j = new Date().getFullYear() + 2 + zufall(3);
+  const m = 1 + zufall(12);
+  return {
+    brand,
+    nummer: voll(bin),
+    monat: String(m).padStart(2, "0"),
+    jahr: String(j).slice(2),
+    cvc: brand === "amex" ? String(1000 + zufall(8999)) : String(100 + zufall(899)),
+    halter: (i.v + " " + i.n).toUpperCase(),
+    plz: i.plz, tok:null, pm:null
+  };
+}
+function karte(neu){
+  const b = S.brand;
+  if (neu || !S.karten[b] || !S.karten[b].nummer){
+    S.karten[b] = neueKarte(b);
+    speichern();
+    log("Karte " + S.karten[b].nummer.slice(-4) + " erzeugt (" + b + ")");
+  }
+  return S.karten[b];
+}
+
+/* ═══════════════ KRYPTO ═══════════════ */
+function crc16(b){
+  let c = 0xFFFF;
+  for (const x of b){
+    c ^= x << 8;
+    for (let i = 0; i < 8; i++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF;
+  }
+  return c & 0xFFFF;
+}
+
+const IP=[58,50,42,34,26,18,10,2,60,52,44,36,28,20,12,4,62,54,46,38,30,22,14,6,64,56,48,40,32,24,16,8,57,49,41,33,25,17,9,1,59,51,43,35,27,19,11,3,61,53,45,37,29,21,13,5,63,55,47,39,31,23,15,7];
+const FP=[40,8,48,16,56,24,64,32,39,7,47,15,55,23,63,31,38,6,46,14,54,22,62,30,37,5,45,13,53,21,61,29,36,4,44,12,52,20,60,28,35,3,43,11,51,19,59,27,34,2,42,10,50,18,58,26,33,1,41,9,49,17,57,25];
+const E=[32,1,2,3,4,5,4,5,6,7,8,9,8,9,10,11,12,13,12,13,14,15,16,17,16,17,18,19,20,21,20,21,22,23,24,25,24,25,26,27,28,29,28,29,30,31,32,1];
+const P=[16,7,20,21,29,12,28,17,1,15,23,26,5,18,31,10,2,8,24,14,32,27,3,9,19,13,30,6,22,11,4,25];
+const PC1=[57,49,41,33,25,17,9,1,58,50,42,34,26,18,10,2,59,51,43,35,27,19,11,3,60,52,44,36,63,55,47,39,31,23,15,7,62,54,46,38,30,22,14,6,61,53,45,37,29,21,13,5,28,20,12,4];
+const PC2=[14,17,11,24,1,5,3,28,15,6,21,10,23,19,12,4,26,8,16,7,27,20,13,2,41,52,31,37,47,55,30,40,51,45,33,48,44,49,39,56,34,53,46,42,50,36,29,32];
+const SHIFT=[1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1];
+const SBOX=[
+[14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7,0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8,4,1,14,8,13,6,2,11,15,12,9,7,3,10,5,0,15,12,8,2,4,9,1,7,5,11,3,14,10,0,6,13],
+[15,1,8,14,6,11,3,4,9,7,2,13,12,0,5,10,3,13,4,7,15,2,8,14,12,0,1,10,6,9,11,5,0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15,13,8,10,1,3,15,4,2,11,6,7,12,0,5,14,9],
+[10,0,9,14,6,3,15,5,1,13,12,7,11,4,2,8,13,7,0,9,3,4,6,10,2,8,5,14,12,11,15,1,13,6,4,9,8,15,3,0,11,1,2,12,5,10,14,7,1,10,13,0,6,9,8,7,4,15,14,3,11,5,2,12],
+[7,13,14,3,0,6,9,10,1,2,8,5,11,12,4,15,13,8,11,5,6,15,0,3,4,7,2,12,1,10,14,9,10,6,9,0,12,11,7,13,15,1,3,14,5,2,8,4,3,15,0,6,10,1,13,8,9,4,5,11,12,7,2,14],
+[2,12,4,1,7,10,11,6,8,5,3,15,13,0,14,9,14,11,2,12,4,7,13,1,5,0,15,10,3,9,8,6,4,2,1,11,10,13,7,8,15,9,12,5,6,3,0,14,11,8,12,7,1,14,2,13,6,15,0,9,10,4,5,3],
+[12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11,10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8,9,14,15,5,2,8,12,3,7,0,4,10,1,13,11,6,4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13],
+[4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1,13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6,1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2,6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12],
+[13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7,1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2,7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8,2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11]];
+
+const bits = b => {
+  const o = [];
+  for (const x of b) for (let i = 7; i >= 0; i--) o.push((x >> i) & 1);
+  return o;
+};
+const bytes = b => {
+  const o = new Uint8Array(b.length >> 3);
+  for (let i = 0; i < o.length; i++){
+    let v = 0;
+    for (let j = 0; j < 8; j++) v = (v << 1) | b[i * 8 + j];
+    o[i] = v;
+  }
+  return o;
+};
+const perm = (b, t) => t.map(i => b[i - 1]);
+
+function feistel(r, k){
+  const e = perm(r, E);
+  for (let i = 0; i < 48; i++) e[i] ^= k[i];
+  const o = [];
+  for (let s = 0; s < 8; s++){
+    const b = e.slice(s * 6, s * 6 + 6);
+    const row = (b[0] << 1) | b[5];
+    const col = (b[1] << 3) | (b[2] << 2) | (b[3] << 1) | b[4];
+    const v = SBOX[s][row * 16 + col];
+    o.push((v >> 3) & 1, (v >> 2) & 1, (v >> 1) & 1, v & 1);
+  }
+  return perm(o, P);
+}
+function des(block, key){
+  const p = perm(bits(key), PC1);
+  const c = p.slice(0, 28), d = p.slice(28, 56);
+  const runden = [];
+  for (let i = 0; i < 16; i++){
+    for (let s = 0; s < SHIFT[i]; s++){ c.push(c.shift()); d.push(d.shift()); }
+    runden.push(perm(c.concat(d), PC2));
+  }
+  const b = perm(bits(block), IP);
+  let l = b.slice(0, 32), r = b.slice(32, 64);
+  for (let i = 0; i < 16; i++){
+    const t = feistel(r, runden[i]);
+    for (let j = 0; j < 32; j++) t[j] ^= l[j];
+    l = r;
+    r = t;
+  }
+  return bytes(perm(r.concat(l), FP));
+}
+const DES_KEY = new Uint8Array([0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88]);
+
+function passwortAus(imei){
+  const t = String(imei).replace(/\D/g, "").padEnd(16, "0").slice(0, 16);
+  const a = des(u8(t.slice(0, 8)), DES_KEY);
+  const b = des(u8(t.slice(8, 16)), DES_KEY);
+  return hex(a).toUpperCase();
+}
+
+const DES_OK = (() => {
+  try {
+    return hex(des(vonHex("0123456789ABCDEF"), vonHex("133457799BBCDFF1"))).toUpperCase() === "85E813540F0AB405";
+  } catch(_){ return false; }
+})();
+
+/* ═══════════════ RAHMEN ═══════════════ */
+function rahmen(cmd, payload){
+  payload = payload || new Uint8Array(0);
+  const l = new Uint8Array(6 + payload.length);
+  l[0] = 0x46; l[1] = 0x43;
+  l[2] = (cmd >> 8) & 0xFF; l[3] = cmd & 0xFF;
+  l[4] = (payload.length >> 8) & 0xFF; l[5] = payload.length & 0xFF;
+  l.set(payload, 6);
+  const c = crc16(l);
+  const o = new Uint8Array(l.length + 2);
+  o.set(l);
+  o[o.length - 2] = (c >> 8) & 0xFF;
+  o[o.length - 1] = c & 0xFF;
+  return o;
+}
+
+const OKAI_PW = "OKAIYLBT";
+function okaiFrame(op, felder){
+  S.okaiSeq = ((S.okaiSeq || 0) + 1) & 0xFFFF;
+  const s = S.okaiSeq.toString(16).toUpperCase().padStart(4, "0");
+  const f = (felder || []).map(String);
+  return "AT+" + op + "=" + (f.length ? f.join(",") + "," : "") + s + "$\r\n";
+}
+
+/* ═══════════════ BLUETOOTH ═══════════════ */
+const UART = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const OKAI_SVC = "00002c00-0000-1000-8000-00805f9b34fb";
+const DIENSTE = [
+  OKAI_SVC, UART,
+  "0000ffe0-0000-1000-8000-00805f9b34fb",
+  "0000ffe5-0000-1000-8000-00805f9b34fb",
+  "0000ffe9-0000-1000-8000-00805f9b34fb",
+  "0000fff0-0000-1000-8000-00805f9b34fb",
+  "0000ff00-0000-1000-8000-00805f9b34fb",
+  "49535343-fe7d-4ae5-8fa9-9fafd205e455",
+  "0000fee7-0000-1000-8000-00805f9b34fb",
+  "0000fee9-0000-1000-8000-00805f9b34fb",
+  "0000fe95-0000-1000-8000-00805f9b34fb"
+];
+const NAMEN = [
+  { namePrefix:"lime-" }, { namePrefix:"Lime" }, { namePrefix:"OKAI" },
+  { namePrefix:"ES2" }, { namePrefix:"ES4" }, { namePrefix:"Voi" }, { namePrefix:"Bolt" }
+];
+
+const okaiCh = () => !!(S.ch && S.ch.svc === OKAI_SVC);
+
+function note(ev){
+  const dv = ev.target.value;
+  const b = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength);
+  const t = new TextDecoder().decode(b);
+  S.rx = (S.rx + t).slice(-400);
+  const i = S.rx.lastIndexOf("$");
+  if (i >= 0){
+    S.atRx = S.rx.slice(0, i + 1).slice(-200);
+    S.rx = S.rx.slice(i + 1);
+    S.notes++;
+  } else if (/OK|AT\+|ACK/i.test(t)) S.notes++;
+  ok("<- " + t.replace(/[\r\n]+/g, " ").slice(0, 90));
+}
+
+async function suchen(alle){
+  if (!navigator.bluetooth) throw new Error("kein Web Bluetooth (Bluefy nötig)");
+  const opt = { optionalServices: DIENSTE };
+  if (alle) opt.acceptAllDevices = true;
+  else opt.filters = NAMEN;
+  const d = await navigator.bluetooth.requestDevice(opt);
+  S.dev = d;
+  d.addEventListener("gattserverdisconnected", () => {
+    log("Verbindung weg.");
+    S.srv = null; S.ch = null; S.nt = null; S.rx = "";
+    anzeigen();
+  });
+  log("Gewählt: " + (d.name || "ohne Namen"));
+  await verbinden();
+}
+
+async function verbinden(){
+  if (!S.dev) throw new Error("kein Gerät");
+  if (S.dev.gatt.connected && S.ch) return;
+  S.srv = await S.dev.gatt.connect();
+  await sammeln();
+  anzeigen();
+}
+
+async function sammeln(){
+  S.ch = null; S.nt = null; S.okai = false; S.rx = ""; S.atRx = "";
+  const dienste = await S.srv.getPrimaryServices();
+  let best = null, punkte = -1;
+  for (const s of dienste){
+    const svc = s.uuid;
+    let chars = [];
+    try { chars = await s.getCharacteristics(); } catch(_){ continue; }
+    for (const c of chars){
+      if (!c.properties.write && !c.properties.writeWithoutResponse) continue;
+      let score = 1;
+      if (svc === OKAI_SVC) score = 30;
+      else if (svc === UART) score = 25;
+      else if (/ffe0|fff0|ff00|fee7/i.test(svc)) score = 20;
+      if (c.properties.notify || c.properties.indicate) score += 4;
+      if (score > punkte){ punkte = score; best = { svc, wr:c.uuid, char:c }; }
+    }
+  }
+  if (!best) throw new Error("kein Schreibkanal gefunden");
+  S.ch = best;
+  S.okai = best.svc === OKAI_SVC;
+  const nt = await suchenNotify(best.svc);
+  if (nt){
+    try {
+      await nt.startNotifications();
+      nt.addEventListener("characteristicvaluechanged", note);
+      S.nt = nt;
+    } catch(e){ warn("Melden nicht möglich: " + kurz(e)); }
+  }
+  ok("Kanal " + (S.okai ? "OKAI-AT" : best.svc.slice(4, 8)) + (S.nt ? " + Rückkanal" : " ohne Rückkanal"));
+}
+
+async function suchenNotify(svcUuid){
+  try {
+    const s = await S.srv.getPrimaryService(svcUuid);
+    for (const c of await s.getCharacteristics()){
+      if (c.properties.notify || c.properties.indicate) return c;
+    }
+  } catch(_){}
+  return null;
+}
+
+async function sende(daten){
+  if (!S.ch) throw new Error("kein Kanal");
+  const b = typeof daten === "string" ? u8(daten) : daten;
+  const c = S.ch.char;
+  const kennung = S.ch.svc + "/" + S.ch.wr;
+  try {
+    if (c.properties.writeWithoutResponse) await c.writeValueWithoutResponse(b);
+    else await c.writeValue(b);
+    if (S.dead[kennung]){ S.dead[kennung] = 0; log("Kanal antwortet wieder"); }
+    return true;
+  } catch(e){
+    S.dead[kennung] = (S.dead[kennung] || 0) + 1;
+    if (S.dead[kennung] === 3) warn("Kanal meldet: " + kurz(e));
+    return false;
+  }
+}
+
+async function wecken(){
+  await sende(rahmen(0x1101, u8("LIMEBIKE")));
+  await sleep(700);
+}
+
+async function limeEntsperren(){
+  for (let i = 0; i < 3; i++){
+    await wecken();
+    if (S.notes) break;
+  }
+  S.notes = 0;
+  await sende(rahmen(0x1661, new Uint8Array([0xF1])));
+  await sleep(700);
+  if (!S.notes){
+    const imei = ((S.dev && S.dev.name) || "").replace(/[^0-9]/g, "");
+    if (imei.length >= 14){
+      const pw = passwortAus(imei).slice(0, 8);
+      log("Passwortrahmen mit " + pw);
+      await sende(rahmen(0x1663, u8(pw)));
+      await sleep(700);
+      if (!S.notes){
+        await sende(rahmen(0x1661, new Uint8Array([0xF1])));
+        await sleep(700);
+      }
+    }
+  }
+  return S.notes > 0;
+}
+
+async function okaiSchalten(an){
+  S.notes = 0;
+  await sende(okaiFrame("OKSCM", [OKAI_PW, an ? "0" : "1"]));
+  await sleep(600);
+  if (!S.notes){
+    await sleep(400);
+    await sende(okaiFrame("OKSCM", [OKAI_PW, an ? "0" : "1"]));
+    await sleep(600);
+  }
+  return S.notes > 0;
+}
+
+async function okaiAkku(){
+  S.notes = 0; S.atRx = "";
+  await sende(okaiFrame("OKBCL", [OKAI_PW]));
+  await sleep(900);
+  const m = S.atRx.match(/(\d{1,3})\s*%?/);
+  return m ? m[1] + " %" : (S.atRx ? S.atRx.slice(0, 40) : "keine Antwort");
+}
+
+const WORTE_AN = ["unlock","UNLOCK","ON","WS","WAKE","U1","OPEN"];
+const WORTE_AUS = ["lock","LOCK","OFF","K1","L1","CLOSE"];
+const huelle = w => [w, w + "\r\n", "*" + w + "#", "\x02" + w + "\x03", "#" + w + "#", "$" + w + "#"];
+
+async function rohling(an){
+  const woerter = an ? WORTE_AN : WORTE_AUS;
+  const reihen = [];
+  if (okaiCh() || S.brand !== "lime") reihen.push(okaiFrame("OKSCM", [OKAI_PW, an ? "0" : "1"]));
+  reihen.push(rahmen(an ? 0x1661 : 0x1662, new Uint8Array([an ? 0xF1 : 0xF0])));
+  for (const w of woerter) for (const h of huelle(w)) reihen.push(h);
+  S.notes = 0;
+  for (const r of reihen){
+    if (S.notes) return true;
+    await sende(r);
+    await sleep(450);
+    if (S.notes) return true;
+  }
+  return S.notes > 0;
+}
+
+/* ═══════════════ POSTFÄCHER ═══════════════ */
+const GW_DOMAIN = "ldubai.com";
+
+function trifft(text, seit){
+  const t = String(text || "");
+  if (!/lime/i.test(t)) return false;
+  if (!/(token|magic|verify|confirm|login)/i.test(t)) return false;
+  const d = Date.parse((t.match(/\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/) || [""])[0]);
+  return !seit || !d || d >= seit - 120000;
+}
+
+function linkAus(t){
+  const m = String(t).match(/https?:\/\/[^\s"'<>)]+/g) || [];
+  for (const u of m){
+    if (/lime/i.test(u) && /token|magic|verify|login/i.test(u)) return u.replace(/&amp;/g, "&");
+  }
+  const t2 = String(t).match(/[?&]token=([A-Za-z0-9._-]{10,})/);
+  return t2 ? "token:" + t2[1] : null;
+}
+
+async function guerilla(){
+  const a = await jget("https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en");
+  if (!a || !a.email_addr) throw new Error("keine Adresse");
+  const name = "rk" + Date.now().toString(36) + zufall(99);
+  let adresse = a.email_addr;
+  try {
+    const b = await jget("https://api.guerrillamail.com/ajax.php?f=set_email_user&email_user=" + name + "&sid_token=" + a.sid_token + "&lang=en");
+    if (b && b.email_addr) adresse = b.email_addr;
+  } catch(_){}
+  return { art:"guerrilla", adresse, sid:a.sid_token, seit:Date.now(), gelesen:{} };
+}
+
+async function tmBasis(basis, name){
+  let dom = GW_DOMAIN;
+  try {
+    const d = await jget(basis + "/domains");
+    const e = d && d["hydra:member"] && d["hydra:member"][0];
+    if (e && e.domain) dom = e.domain;
+    else log(name + ": keine Domain, nehme " + GW_DOMAIN);
+  } catch(e){ log(name + " domains: " + kurz(e) + " — nehme " + GW_DOMAIN); }
+
+  const nutzer = "rk" + Date.now().toString(36) + zufall(999);
+  const adresse = nutzer + "@" + dom;
+  const pw = "Rk!" + Math.random().toString(36).slice(2, 10);
+  const r = await jsend(basis + "/accounts", { address:adresse, password:pw });
+  if (!r.ok && r.status !== 422) throw new Error("Konto HTTP " + r.status);
+  const t = await jsend(basis + "/token", { address:adresse, password:pw });
+  if (!t.data || !t.data.token) throw new Error("kein Token");
+  return { art:"json", basis, adresse, pw, tok:t.data.token, seit:Date.now(), gelesen:{} };
+}
+
+async function dropmail(){
+  const r = await jsend("https://dropmail.me/api/graphql/web-test-2023", {
+    query:"mutation{introduceSession{id,expiresAt,addresses{address}}}"
+  });
+  const s = r.data && r.data.data && r.data.data.introduceSession;
+  if (!s || !s.addresses || !s.addresses[0]) throw new Error("kein Postfach");
+  return { art:"drop", id:s.id, adresse:s.addresses[0].address, seit:Date.now(), gelesen:{} };
+}
+
+async function postfach(){
+  const wege2 = [
+    ["mail.tm", () => tmBasis("https://api.mail.tm", "mail.tm")],
+    ["mail.gw", () => tmBasis("https://api.mail.gw", "mail.gw")],
+    ["guerrilla", guerilla],
+    ["dropmail", dropmail]
+  ];
+  const fehler = [];
+  for (const [name, w] of wege2){
+    stat("Postfach: " + name + " …", "warn");
+    try {
+      const p = await w();
+      if (p && p.adresse){ ok("Postfach " + p.adresse); return p; }
+      fehler.push(name + ": leer");
+    } catch(e){
+      log(name + ": " + kurz(e));
+      fehler.push(name + ": " + kurz(e));
+    }
+  }
+  stat("kein Postfach — " + fehler.join(" · "), "err");
+  return null;
+}
+
+async function hole(p){
+  if (p.art === "guerrilla"){
+    const l = await jget("https://api.guerrillamail.com/ajax.php?f=check_email&seq=0&sid_token=" + p.sid + "&lang=en");
+    for (const m of (l && l.list) || []){
+      if (p.gelesen[m.mail_id]) continue;
+      p.gelesen[m.mail_id] = 1;
+      const f = await jget("https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=" + m.mail_id + "&sid_token=" + p.sid + "&lang=en");
+      if (f) return { text:(f.mail_body || "") + " " + (f.mail_subject || ""), seit:p.seit };
+    }
+    return null;
+  }
+  if (p.art === "json"){
+    const l = await jget(p.basis + "/messages?page=1", { Authorization:"Bearer " + p.tok });
+    for (const m of (l && l["hydra:member"]) || []){
+      if (p.gelesen[m.id]) continue;
+      p.gelesen[m.id] = 1;
+      const f = await jget(p.basis + "/messages/" + m.id, { Authorization:"Bearer " + p.tok });
+      if (f) return { text:((f.text || "") + " " + (f.html || [""]).join(" ") + " " + (f.subject || "")), seit:Date.parse(f.createdAt) || p.seit };
+    }
+    return null;
+  }
+  if (p.art === "drop"){
+    const r = await jsend("https://dropmail.me/api/graphql/web-test-2023", {
+      query:"query($id:String!){session(id:$id){mails{id,headerSubject,text}}}",
+      variables:{ id:p.id }
+    });
+    const s = r.data && r.data.data && r.data.data.session;
+    for (const m of (s && s.mails) || []){
+      if (p.gelesen[m.id]) continue;
+      p.gelesen[m.id] = 1;
+      return { text:(m.text || "") + " " + (m.headerSubject || ""), seit:p.seit };
+    }
+    return null;
+  }
+  return null;
+}
+
+/* ═══════════════ LIME ═══════════════ */
+const LIME = "https://web-production.lime.bike/api/rider";
+const APP = "3.30.0";
+
+function dtok(){
+  if (!S.dtok){
+    S.dtok = "ios-" + Math.random().toString(36).slice(2, 12) + "-" + Date.now().toString(36);
+    ls("dtok", S.dtok);
+  }
+  return S.dtok;
+}
+function kopf(a){
+  const h = {
+    "Content-Type":"application/json",
+    "Accept":"application/json",
+    "Platform":"ios",
+    "App-Version":APP,
+    "X-Device-Token":dtok()
+  };
+  if (a && a.t) h.Authorization = "bearer " + a.t;
+  return h;
+}
+const lime = (url, opt, a) => {
+  opt = opt || {};
+  opt.headers = Object.assign(kopf(a), opt.headers || {});
+  return roh(LIME + url, opt);
+};
+async function limeJson(url, opt, a){
+  const r = await lime(url, opt, a);
+  const t = await r.text();
+  let d = null;
+  try { d = JSON.parse(t); } catch(_){}
+  return { status:r.status, ok:r.ok, text:t.slice(0, 300), data:d };
+}
+
+async function limeKonto(){
+  log("Postfach wird gesucht …");
+  const p = await postfach();
+  if (!p) throw new Error("kein Postfach erreichbar");
+  stat("Magic-Link anfordern …", "warn");
+  let r = null;
+  for (const v of [7, 6, 5, 4]){
+    r = await limeJson("/v2/onboarding/magic-link", {
+      method:"POST",
+      body: JSON.stringify({
+        email:p.adresse,
+        user_agreement_version:v,
+        user_agreement_country_code:"DE",
+        user_agreement_version_string:v + ".0"
+      })
+    });
+    log("magic-link v" + v + ": HTTP " + r.status + " " + ((r.data && r.data.message) || ""));
+    if (r.status < 400) break;
+  }
+  if (!r || r.status >= 400) throw new Error("Anforderung abgelehnt " + (r ? r.status : ""));
+
+  const runden = [40, 60, 60];
+  for (let i = 0; i < runden.length; i++){
+    stat("warte auf Mail, Runde " + (i + 1) + " (" + runden[i] + " s)", "warn");
+    log("Runde " + (i + 1) + " (" + runden[i] + " s)");
+    const ende2 = Date.now() + runden[i] * 1000;
+    while (Date.now() < ende2){
+      const m = await hole(p).catch(() => null);
+      if (m && trifft(m.text, p.seit)){
+        const l = linkAus(m.text);
+        if (l){
+          ok("Link gefunden");
+          const a = await limeLogin(l);
+          if (a) return a;
+        }
+      }
+      await sleep(4000);
+    }
+  }
+  throw new Error("kein Token");
+}
+
+async function limeLogin(l){
+  const kandidaten = [];
+  if (l.indexOf("token:") === 0) kandidaten.push(l.slice(6));
+  else {
+    kandidaten.push(l);
+    const q = l.match(/[?&]token=([A-Za-z0-9._-]{10,})/);
+    if (q) kandidaten.push(q[1]);
+    const p = l.match(/\/([A-Za-z0-9._-]{20,})(?:[?#]|$)/);
+    if (p) kandidaten.push(p[1]);
+  }
+  for (const k of kandidaten){
+    for (const form of [
+      () => limeJson("/v2/onboarding/login", { method:"POST", body: JSON.stringify({ token:k }) }),
+      () => limeJson("/v1/login?token=" + encodeURIComponent(k)),
+      () => limeJson("/v1/onboarding?token=" + encodeURIComponent(k))
+    ]){
+      try {
+        const r = await form();
+        const t = r.data && (r.data.token || (r.data.data && r.data.data.attributes && r.data.data.attributes.token));
+        if (r.status < 400 && t){
+          const a = { b:"lime", t, bal:0, card:null, at:Date.now() };
+          S.acct = a;
+          speichern();
+          ok("Lime-Konto aktiv");
+          return a;
+        }
+      } catch(_){}
+    }
+  }
+  warn("Token nicht angenommen");
+  return null;
+}
+
+async function guthaben(){
+  const a = S.acct;
+  if (!a) throw new Error("kein Konto");
+  if (a.b !== "lime"){ stat("Guthaben nur bei Lime abfragbar", "warn"); return; }
+  const r = await limeJson("/v1/wallets", {}, a);
+  if (!r.ok){ stat("Guthaben HTTP " + r.status, "warn"); return; }
+  const w = r.data && (r.data.data || r.data);
+  const rest = w && (w.balance || w.credit || (w.attributes && w.attributes.balance));
+  stat("Guthaben: " + (rest != null ? rest : "0") + " · Karte: " + (a.card ? "hinterlegt" : "keine"), rest > 0 ? "ok" : "warn");
+}
+
+async function blocker(){
+  const a = S.acct;
+  if (!a || a.b !== "lime"){ stat("Blocker nur bei Lime", "warn"); return; }
+  const r = await limeJson("/v1/views/rider_map_start_blockers", {}, a);
+  const l = (r.data && (r.data.data || r.data.blockers)) || [];
+  if (!l.length){ log("keine Blocker gemeldet"); return; }
+  for (const b of l) warn("Blocker: " + (b.title || b.code || JSON.stringify(b)).slice(0, 80));
+}
+
+async function codes(){
+  const a = S.acct;
+  if (!a) throw new Error("kein Konto");
+  for (const c of ["WILLKOMMEN","WELCOME","START","HALLO","ERSTFAHRT"]){
+    const r = await limeJson("/v1/promos/redeem", { method:"POST", body: JSON.stringify({ promo_code:c }) }, a);
+    log(c + ": " + r.status + " " + ((r.data && (r.data.message || r.data.code)) || "").slice(0, 60));
+  }
+}
+
+/* ═══════════════ VOI / BOLT ═══════════════ */
+function land(nummer){
+  const p = nummer.replace(/[^\d+]/g, "");
+  const t = [["+49","DE"],["+43","AT"],["+41","CH"],["+33","FR"],["+39","IT"],["+34","ES"],
+             ["+46","SE"],["+47","NO"],["+45","DK"],["+31","NL"],["+32","BE"],["+44","GB"]];
+  for (const [pre, c] of t) if (p.startsWith(pre)) return c;
+  return "DE";
+}
+
+async function voiKonto(nummer){
+  const r1 = await jsend("https://api.voiapp.io/v1/auth/verify/phone", {
+    country_code: land(nummer),
+    phone_number: nummer.replace(/[^\d]/g, "").replace(/^00/, "")
+  });
+  log("voi phone: HTTP " + r1.status + " " + r1.text);
+  const vt = r1.data && r1.data.token;
+  if (!vt) throw new Error("Voi " + r1.status);
+
+  const code = await frage("SMS-Code von Voi eingeben");
+  const r2 = await jsend("https://api.voiapp.io/v2/auth/verify/code", { code, token:vt });
+  let at = r2.data && r2.data.authToken;
+  if (!at && r2.data && r2.data.verificationStep === "emailValidationRequired"){
+    const p = await jsend("https://api.voiapp.io/v1/auth/verify/presence", {
+      email: "rider" + zufall(9999) + "@gmail.com",
+      token: vt
+    });
+    at = p.data && p.data.authToken;
+  }
+  if (!at && r2.data && r2.data.verificationStep === "deviceActivationRequired"){
+    const p = await jsend("https://api.voiapp.io/v3/auth/verify/device/activate", { token:vt, provider:"sms" });
+    at = p.data && p.data.authToken;
+  }
+  if (!at) throw new Error("Voi-Code abgelehnt");
+
+  const s = await jsend("https://api.voiapp.io/v1/auth/session", { authenticationToken:at });
+  const t = s.data && s.data.accessToken;
+  if (!t) throw new Error("keine Sitzung");
+  S.acct = { b:"voi", t, refresh:s.data.authenticationToken, nummer, bal:0, at:Date.now() };
+  speichern();
+  ok("Voi-Konto aktiv");
+}
+
+async function boltKonto(nummer){
+  const id = crypto.randomUUID();
+  const q = "version=CI.23.0&deviceId=" + id + "&deviceType=iphone&device_name=iPhone14,3&device_os_version=iOS17.0&language=de";
+
+  const intl = await jget("https://user.bolt.eu/user/getMobileNumberInInternationalFormat?phone=" +
+    encodeURIComponent(nummer) + "&" + q).catch(() => null);
+  const num = (intl && intl.data && intl.data.phone_number_in_international_format) || nummer;
+
+  const r1 = await jsend("https://user.bolt.eu/user/register/phone?" + q, { phone:num, phone_uuid:id });
+  log("bolt phone: HTTP " + r1.status + " " + ((r1.data && r1.data.message) || ""));
+  if (!r1.ok || (r1.data && r1.data.code !== 0)) throw new Error("Bolt " + r1.status);
+
+  const code = await frage("SMS-Code von Bolt eingeben");
+  const r2 = await jsend("https://node.bolt.eu/user/user/v1/confirmVerification?" + q, {
+    phone:num, phone_uuid:id, verification:{ confirmation_data:{ code } }
+  });
+  if (!r2.data || r2.data.code !== 0) throw new Error("Bolt-Code abgelehnt");
+  S.acct = { b:"bolt", t:btoa(num + ":" + id), nummer, bal:0, at:Date.now() };
+  speichern();
+  ok("Bolt-Konto aktiv");
+}
+
+function frage(text){
+  stat(text, "warn");
+  return new Promise(r => {
+    S.warte = v => { S.warte = null; anzeigen(); r(v); };
+    anzeigen();
+  });
+}
+
+/* ═══════════════ KARTE HINTERLEGEN ═══════════════ */
+async function pkSuchen(){
+  const seiten = [
+    "https://www.lime.com/de/de/",
+    "https://www.lime.com/",
+    "https://web-production.lime.bike/api/rider/v1/onboarding"
+  ];
+  for (const s of seiten){
+    try {
+      const r = await roh(s);
+      const t = await r.text();
+      const m = t.match(/pk_(?:live|test)_[A-Za-z0-9]{20,}/);
+      if (m){ S.pk.lime = m[0]; speichern(); ok("Schlüssel " + m[0].slice(0, 14) + "…"); return m[0]; }
+      const src = [...t.matchAll(/src="([^"]+\.js[^"]*)"/g)].map(x => x[1]).slice(0, 8);
+      for (const s2 of src){
+        try {
+          const u = s2.startsWith("http") ? s2 : new URL(s2, s).href;
+          const r2 = await roh(u);
+          const m2 = (await r2.text()).match(/pk_(?:live|test)_[A-Za-z0-9]{20,}/);
+          if (m2){ S.pk.lime = m2[0]; speichern(); ok("Schlüssel im Bündel " + m2[0].slice(0, 14) + "…"); return m2[0]; }
+        } catch(_){}
+      }
+      log("Schlüssel: keiner auf " + s);
+    } catch(e){ log("Schlüssel: " + kurz(e)); }
+  }
+  return null;
+}
+
+async function tokenisieren(k){
+  const pk = S.pk.lime;
+  if (!pk) return null;
+  const body =
+    "card[number]=" + k.nummer +
+    "&card[exp_month]=" + k.monat +
+    "&card[exp_year]=20" + k.jahr +
+    "&card[cvc]=" + k.cvc +
+    "&card[name]=" + encodeURIComponent(k.halter) +
+    "&card[address_zip]=" + k.plz +
+    "&key=" + pk;
+  try {
+    const r = await fetch("https://api.stripe.com/v1/tokens", {
+      method:"POST",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body
+    });
+    const d = await r.json();
+    if (!r.ok || !d.id){
+      warn("Stripe: " + ((d.error && (d.error.code || d.error.message)) || r.status));
+      return null;
+    }
+    const marke = d.card && d.card.brand;
+    if (marke && BRAND_OK.indexOf(marke) < 0){ warn("Marke " + marke + " unbrauchbar"); return null; }
+    ok("Stripe-Token " + d.id.slice(0, 12) + "…");
+    return d.id;
+  } catch(e){
+    warn("Stripe: " + kurz(e));
+    return null;
+  }
+}
+
+async function hinterlegen(){
+  const a = S.acct;
+  if (!a) throw new Error("kein Konto");
+  if (a.b !== "lime"){ stat("Karte nur bei Lime", "warn"); return; }
+  const k = karte(false);
+  const tok = await tokenisieren(k);
+
+  const felder = {
+    number:k.nummer, exp_month:k.monat, exp_year:"20" + k.jahr, cvc:k.cvc,
+    name:k.halter, address_zip:k.plz
+  };
+  const wege2 = [];
+  if (tok) wege2.push({ payment_method:{ stripe_token:tok } });
+  wege2.push({ payment_method:{ card:felder } });
+  if (tok) wege2.push({ payment_method:{ card:felder }, stripe_token:tok });
+
+  for (const b of wege2){
+    try {
+      const r = await limeJson("/v1/payment_methods", { method:"POST", body: JSON.stringify(b) }, a);
+      log("HTTP " + r.status + " " + r.text);
+      if (r.status < 400){
+        a.card = { tok, pm:(r.data && (r.data.id || (r.data.data && r.data.data.id))) || null };
+        speichern();
+        ok("Karte hinterlegt");
+        stat("Karte hinterlegt", "ok");
+        return;
+      }
+      if (r.data && r.data.message) warn(r.data.message);
+    } catch(e){ warn(kurz(e)); }
+  }
+  stat("Karte nicht bestätigt", "warn");
+}
+
+/* ═══════════════ ABLAUF ═══════════════ */
+let wache = 0;
+function starte(){
+  S.busy = true;
+  anzeigen();
+  clearTimeout(wache);
+  wache = setTimeout(() => { if (S.busy){ err("Zeitüberschreitung"); ende(); } }, 900000);
+}
+function ende(){
+  S.busy = false;
+  S.prov = false;
+  S.rx = ""; S.atRx = ""; S.notes = 0;
+  clearTimeout(wache);
+  anzeigen();
+}
+
+async function entsperren(){
+  starte();
+  stat("entsperre …", "warn");
+  try {
+    if (!S.dev || !S.dev.gatt.connected) await verbinden();
+    let gut = false;
+    if (okaiCh() || S.brand !== "lime") gut = await okaiSchalten(true);
+    if (!gut && S.brand === "lime") gut = await limeEntsperren();
+    if (!gut) gut = await rohling(true);
+    if (gut){ ok("Roller reagiert"); stat("entsperrt", "ok"); }
+    else { warn("keine Antwort"); stat("keine Antwort — ROHLING probieren", "warn"); }
+  } catch(e){
+    err(kurz(e));
+    stat("Fehler: " + kurz(e), "err");
+  }
+  ende();
+}
+
+async function sperrenAktion(){
+  starte();
+  try {
+    if (!S.dev || !S.dev.gatt.connected) await verbinden();
+    let gut = false;
+    if (okaiCh() || S.brand !== "lime") gut = await okaiSchalten(false);
+    if (!gut && S.brand === "lime"){
+      S.notes = 0;
+      await sende(rahmen(0x1662, new Uint8Array([0xF0])));
+      await sleep(700);
+      gut = S.notes > 0;
+    }
+    stat(gut ? "gesperrt" : "keine Antwort", gut ? "ok" : "warn");
+  } catch(e){
+    err(kurz(e));
+    stat("Fehler: " + kurz(e), "err");
+  }
+  ende();
+}
+
+async function akku(){
+  starte();
+  try {
+    if (!S.dev || !S.dev.gatt.connected) await verbinden();
+    if (okaiCh()) stat("Akku: " + await okaiAkku());
+    else stat("Akku nur über OKAI lesbar", "warn");
+  } catch(e){ stat("Fehler: " + kurz(e), "err"); }
+  ende();
+}
+
+async function diagnose(){
+  starte();
+  try {
+    if (!S.dev) throw new Error("erst suchen");
+    await verbinden();
+    for (const s of await S.srv.getPrimaryServices()){
+      log("Dienst " + s.uuid);
+      for (const c of await s.getCharacteristics()){
+        log("  " + c.uuid + " [" + Object.keys(c.properties).filter(p => c.properties[p]).join(",") + "]");
+      }
+    }
+  } catch(e){ err(kurz(e)); }
+  ende();
+}
+
+/* ═══════════════ ANZEIGE ═══════════════ */
+const ALLE = [
+  "bFind","bAll","bDiag","bUnlock","bLock","bBat","bShot","bOwn","bLink","bBal","bCodes",
+  "bCard","bAttach","bScan","bTorch","bOkaiUn","bOkaiLk","bOkaiBat","bAt","bRaw","bFrame",
+  "bRead","bImei","bRelay","bLime","bVoi","bBolt","bTok","bBlock"
+];
+
+function marke(){
+  [["lime","bLime"],["voi","bVoi"],["bolt","bBolt"]].forEach(([b, id]) => {
+    const e = $(id);
+    if (e) e.classList.toggle("an", S.brand === b);
+  });
+}
+
+function anzeigen(){
+  const b = S.busy;
+  const conn = !!(S.dev && S.dev.gatt && S.dev.gatt.connected);
+  const set = (id, aus) => { const e = $(id); if (e) e.disabled = !!aus; };
+  ALLE.forEach(id => set(id, b));
+  set("bFind", b);
+  set("bAll", b);
+  set("bUnlock", b || !conn);
+  set("bLock", b || !conn);
+  set("bBat", b || !conn);
+  set("bShot", b || !conn);
+  set("bDiag", b || !S.dev);
+  set("bOwn", b || S.prov);
+  set("bLink", b || S.prov);
+  set("bLime", b || S.prov);
+  set("bVoi", b || S.prov);
+  set("bBolt", b || S.prov);
+  set("bBal", b || !S.acct);
+  set("bCodes", b || !S.acct);
+  set("bCard", b || !S.acct);
+  set("bAttach", b || !S.acct);
+  set("bBlock", b || !S.acct);
+  set("bTok", b || S.prov);
+  set("bOtp", !S.warte);
+  set("bOkaiUn", b || !okaiCh());
+  set("bOkaiLk", b || !okaiCh());
+  set("bOkaiBat", b || !okaiCh());
+  set("bAt", b || !conn);
+  set("bRaw", b || !conn);
+  set("bFrame", b || !conn);
+  set("bRead", b || !conn);
+  set("bTorch", b || !S.cam);
+}
+
+/* ═══════════════ KAMERA ═══════════════ */
+async function jsqrLaden(){
+  if (window.jsQR) return true;
+  return new Promise(r => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+    s.onload = () => r(!!window.jsQR);
+    s.onerror = () => r(false);
+    document.head.appendChild(s);
+  });
+}
+
+async function scan(){
+  if (!(await jsqrLaden())){ stat("Scanner nicht ladbar", "err"); return; }
+  const v = $("vid");
+  try {
+    S.cam = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ ideal:"environment" }, width:{ ideal:1280 }, height:{ ideal:720 } }
+    });
+  } catch(e){ stat("Kamera: " + kurz(e), "err"); return; }
+  v.srcObject = S.cam;
+  await v.play();
+  $("qr").classList.add("on");
+  anzeigen();
+  const cv = document.createElement("canvas");
+  const cx = cv.getContext("2d", { willReadFrequently:true });
+  let letzte = "", zeit = 0;
+  const schritt = () => {
+    if (!S.cam) return;
+    if (v.readyState === 4){
+      cv.width = v.videoWidth;
+      cv.height = v.videoHeight;
+      cx.drawImage(v, 0, 0);
+      const d = cx.getImageData(0, 0, cv.width, cv.height);
+      const r = window.jsQR(d.data, d.width, d.height, { inversionAttempts:"attemptBoth" });
+      if (r && r.data && (r.data !== letzte || Date.now() - zeit > 2500)){
+        letzte = r.data;
+        zeit = Date.now();
+        log("QR: " + r.data.slice(0, 120));
+        const s = r.data.toLowerCase();
+        brandSetzen(/voi/.test(s) ? "voi" : /bolt/.test(s) ? "bolt" : "lime");
+        stat("erkannt: " + S.brand, "ok");
+        scanStopp();
+        return;
+      }
+    }
+    S.raf = requestAnimationFrame(schritt);
+  };
+  schritt();
+}
+function scanStopp(){
+  cancelAnimationFrame(S.raf);
+  if (S.cam){
+    S.cam.getTracks().forEach(t => t.stop());
+    S.cam = null;
+  }
+  $("qr").classList.remove("on");
+  anzeigen();
+}
+async function licht(){
+  if (!S.cam) return;
+  const t = S.cam.getVideoTracks()[0];
+  try { await t.applyConstraints({ advanced:[{ torch: !t.getSettings().torch }] }); }
+  catch(e){ stat("Licht nicht möglich", "warn"); }
+}
+
+/* ═══════════════ KNÖPFE ═══════════════ */
+function tue(id, fn){
+  const e = $(id);
+  if (e) e.addEventListener("click", async () => {
+    try { await fn(); }
+    catch(x){ err(kurz(x)); stat("Fehler: " + kurz(x), "err"); }
+  });
+}
+
+function brandSetzen(b){
+  S.brand = b;
+  speichern();
+  marke();
+  anzeigen();
+}
+
+tue("bLime", () => brandSetzen("lime"));
+tue("bVoi", () => brandSetzen("voi"));
+tue("bBolt", () => brandSetzen("bolt"));
+
+tue("bFind", async () => { starte(); try { await suchen(false); stat("verbunden mit " + (S.dev && S.dev.name), "ok"); } finally { ende(); } });
+tue("bAll", async () => { starte(); try { await suchen(true); stat("verbunden mit " + (S.dev && S.dev.name), "ok"); } finally { ende(); } });
+tue("bDiag", diagnose);
+tue("bUnlock", entsperren);
+tue("bLock", sperrenAktion);
+tue("bBat", akku);
+tue("bShot", async () => {
+  starte();
+  try {
+    if (!S.dev) throw new Error("erst suchen");
+    await verbinden();
+    const g = await rohling(true);
+    stat(g ? "reagiert" : "keine Antwort", g ? "ok" : "warn");
+  } finally { ende(); }
+});
+
+tue("bOwn", async () => {
+  if (S.brand === "lime"){
+    S.prov = true;
+    anzeigen();
+    try {
+      ident();
+      karte(true);
+      stat("baue Konto …", "warn");
+      const a = await limeKonto();
+      if (!a) throw new Error("kein Konto");
+      stat("Konto bereit", "ok");
+      hinterlegen().catch(() => {});
+    } catch(e){
+      err(kurz(e));
+      stat("Konto: " + kurz(e), "err");
+    } finally { S.prov = false; anzeigen(); }
+    return;
+  }
+  const nummer = $("iPhone").value.trim();
+  if (nummer.length < 8){ stat("Nummer fehlt", "err"); return; }
+  S.prov = true;
+  anzeigen();
+  try {
+    stat("fordere Code an …", "warn");
+    if (S.brand === "voi") await voiKonto(nummer);
+    else await boltKonto(nummer);
+    stat("Konto bereit", "ok");
+    hinterlegen().catch(() => {});
+  } catch(e){
+    err(kurz(e));
+    stat("Konto: " + kurz(e), "err");
+  } finally { S.prov = false; anzeigen(); }
+});
+
+tue("bLink", async () => {
+  const mail = $("iMail").value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mail)){ stat("Mail unplausibel", "err"); return; }
+  S.prov = true;
+  anzeigen();
+  try {
+    stat("sende Magic-Link …", "warn");
+    const r = await limeJson("/v2/onboarding/magic-link", {
+      method:"POST",
+      body: JSON.stringify({ email:mail, user_agreement_version:7, user_agreement_country_code:"DE" })
+    });
+    log("HTTP " + r.status + " " + r.text);
+    if (r.status >= 400) throw new Error("HTTP " + r.status);
+    stat("Mail öffnen, Link kopieren, bei TOKEN einfügen", "warn");
+  } catch(e){
+    err(kurz(e));
+    stat("Mail: " + kurz(e), "err");
+  } finally { S.prov = false; anzeigen(); }
+});
+
+tue("bTok", async () => {
+  const v = $("iTok").value.trim();
+  if (!v){ stat("Token fehlt", "err"); return; }
+  starte();
+  try {
+    const a = await limeLogin(v.startsWith("http") ? v : "token:" + v);
+    stat(a ? "Konto bereit" : "Token abgelehnt", a ? "ok" : "err");
+  } finally { ende(); }
+});
+
+tue("bOtp", () => {
+  if (!S.warte){ stat("kein Code erwartet", "warn"); return; }
+  const c = $("iCode").value.trim();
+  if (c.length < 4){ stat("Code zu kurz", "err"); return; }
+  S.warte(c);
+});
+
+tue("bBal", guthaben);
+tue("bCodes", codes);
+tue("bBlock", blocker);
+tue("bCard", () => { karte(true); stat("Karte " + S.karten[S.brand].nummer.slice(-4) + " bereit", "ok"); });
+tue("bAttach", async () => { starte(); try { await hinterlegen(); } finally { ende(); } });
+tue("bScan", scan);
+tue("bQrClose", scanStopp);
+tue("bTorch", licht);
+
+tue("bCopy", async () => {
+  const t = [...$("log").children].map(d => d.textContent).join("\n");
+  try { await navigator.clipboard.writeText(t); stat("kopiert", "ok"); }
+  catch(e){ stat("kopieren fehlgeschlagen", "err"); }
+});
+tue("bClear", () => { $("log").innerHTML = ""; });
+tue("bReset", () => {
+  Object.keys(localStorage).filter(k => k.indexOf(KEY) === 0).forEach(k => localStorage.removeItem(k));
+  location.reload();
+});
+
+/* Netztest: Relay zuerst und mit GET und POST, danach die öffentlichen Wege */
+tue("bRelay", async () => {
+  const ziel = "https://api.mail.tm/domains";
+  const post = "https://web-production.lime.bike/api/rider/v2/onboarding/magic-link";
+  const koerper = JSON.stringify({ email:"probe@example.com", user_agreement_version:7, user_agreement_country_code:"DE" });
+
+  if (!S.relay) warn("kein Relay gesetzt — teste nur die öffentlichen Wege");
+  else {
+    for (const [name, url, opt] of [
+      ["RELAY GET", S.relay + encodeURIComponent(ziel), {}],
+      ["RELAY POST", S.relay + encodeURIComponent(post),
+        { method:"POST", headers:{ "Content-Type":"application/json" }, body:koerper }]
+    ]){
+      try {
+        const res = await fetch(url, opt);
+        const t = await res.text();
+        const gut = res.ok || /^[{\[]/.test(t.trim());
+        log((gut ? "OK " : "HTTP " + res.status + " ") + name, gut ? "o" : "w");
+      } catch(e){ log("FEHLT " + name + " · " + kurz(e), "e"); }
+    }
+  }
+
+  try {
+    const res = await fetch(ziel);
+    log((res.ok ? "OK " : "HTTP " + res.status + " ") + "DIREKT GET", res.ok ? "o" : "w");
+  } catch(e){ log("FEHLT DIREKT GET · " + kurz(e), "e"); }
+
+  for (const w of GETWEGE){
+    const name = w("x").slice(0, 40);
+    try {
+      const res = await fetch(w(ziel));
+      const t = await res.text();
+      log((res.ok ? "OK " : "HTTP " + res.status + " ") + name, res.ok ? "o" : "w");
+    } catch(e){ log("FEHLT " + name + " · " + kurz(e), "e"); }
+  }
+  for (const w of POSTWEGE){
+    const name = w("x").slice(0, 40);
+    try {
+      const res = await fetch(w(post), { method:"POST", headers:{ "Content-Type":"application/json" }, body:koerper });
+      log("POST " + name + " → HTTP " + res.status, res.status < 500 ? "o" : "w");
+    } catch(e){ log("POST " + name + " FEHLT · " + kurz(e), "e"); }
+  }
+  stat(S.relay ? "Test fertig" : "Test fertig — ohne Relay ist es Glückssache", S.relay ? "ok" : "warn");
+});
+
+tue("bPk", () => {
+  const v = $("iPk").value.trim();
+  if (!/^pk_(live|test)_/.test(v)){ stat("kein pk_", "err"); return; }
+  S.pk.lime = v;
+  speichern();
+  stat("Schlüssel gespeichert", "ok");
+});
+tue("bPkFind", async () => {
+  const p = await pkSuchen();
+  stat(p ? "Schlüssel gefunden" : "kein Schlüssel", p ? "ok" : "warn");
+});
+tue("bBin", () => {
+  const v = $("iBin").value.replace(/\D/g, "");
+  if (v.length < 6){ stat("6 Stellen nötig", "err"); return; }
+  S.karten["bin_" + S.brand] = v;
+  karte(true);
+  stat("BIN " + v + " gesetzt", "ok");
+});
+
+tue("bAt", async () => {
+  if (!S.ch) throw new Error("kein Kanal");
+  const pw = $("iAt").value.trim() || ((S.dev && S.dev.name) || "").replace(/[^0-9]/g, "");
+  S.notes = 0;
+  if (pw) await sende("AT+ATH," + pw + "," + Date.now() + ",1,{}\r\n");
+  await sleep(600);
+  stat(S.notes ? "angemeldet" : "keine Antwort", S.notes ? "ok" : "warn");
+});
+
+tue("bOkaiUn", async () => { starte(); try { const g = await okaiSchalten(true); stat(g ? "entsperrt" : "keine Antwort", g ? "ok" : "warn"); } finally { ende(); } });
+tue("bOkaiLk", async () => { starte(); try { const g = await okaiSchalten(false); stat(g ? "gesperrt" : "keine Antwort", g ? "ok" : "warn"); } finally { ende(); } });
+tue("bOkaiBat", async () => { starte(); try { stat("Akku: " + await okaiAkku()); } finally { ende(); } });
+
+tue("bFrame", async () => {
+  const c = parseInt($("iCmd").value.replace(/\D/g, "") || "0", 16);
+  const f = rahmen(c, vonHex($("iPay").value));
+  log("-> " + hex(f));
+  await sende(f);
+});
+tue("bRead", async () => {
+  const r = parseInt($("iReg").value.replace(/\D/g, "") || "0", 16);
+  const k = new Uint8Array([0xFF, 0x55, r, 0x01, 0x00, 0x00]);
+  log("-> " + hex(k));
+  await sende(k);
+});
+tue("bImei", () => {
+  const v = $("iImei").value.replace(/\D/g, "");
+  if (v.length < 14){ stat("IMEI zu kurz", "err"); return; }
+  const p = passwortAus(v);
+  log("Passwort: " + p);
+  stat("Passwort " + p.slice(0, 8), "ok");
+});
+tue("bRaw", async () => {
+  if (!S.srv) throw new Error("nicht verbunden");
+  const svc = $("iSvc").value.trim();
+  const ch = $("iCh").value.trim();
+  const t = $("iRaw").value.trim();
+  if (svc && ch){
+    const s = await S.srv.getPrimaryService(svc);
+    const c = await s.getCharacteristic(ch);
+    S.ch = { svc, wr:ch, char:c };
+  }
+  await sende(/^[0-9a-f\s]{4,}$/i.test(t) ? vonHex(t) : t);
+  log("gesendet");
+});
+tue("bSaveRelay", () => {
+  let v = $("iRelay").value.trim();
+  if (!v){ stat("Feld leer", "err"); return; }
+  if (!/^https:\/\//.test(v)) v = "https://" + v;
+  if (!/\?url=$/.test(v)) v = v.replace(/\/+$/, "") + "/?url=";
+  $("iRelay").value = v;
+  S.relay = v;
+  S.tot = {};
+  ls("relay", v);
+  stat("Relay gespeichert", "ok");
+});
+tue("bRelayDel", () => {
+  S.relay = "";
+  S.tot = {};
+  $("iRelay").value = "";
+  ls("relay", "");
+  stat("Relay gelöscht — öffentliche Wege", "warn");
+});
+
+/* ═══════════════ START ═══════════════ */
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault());
+document.addEventListener("touchmove", e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
+document.addEventListener("visibilitychange", () => { if (document.hidden) scanStopp(); });
+
+laden();
+marke();
+if (DES_OK) log("DES-Selbsttest ok");
+else err("DES-Selbsttest abweichend");
+log("bereit · Marke " + S.brand);
+if (!S.relay) warn("Kein Relay gesetzt — Konto und Karte gehen über öffentliche Proxys und können scheitern. ERWEITERT → RELAY.");
+else ok("Relay aktiv");
+anzeigen();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+</script>
+</body>
+</html>
